@@ -5,6 +5,17 @@ import glob
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from keras.models import Model
+from keras.layers.normalization import BatchNormalization
+from keras.layers.convolutional import Conv2D
+from keras.layers.convolutional import MaxPooling2D
+from keras.layers.core import Activation
+from keras.layers.core import Dropout
+from keras.layers.core import Lambda
+from keras.layers.core import Dense
+from keras.layers import Flatten
+from keras.layers import Input
+import tensorflow as tf
 dataset_folder_name = 'UTKFace'
 TRAIN_TEST_SPLIT = 0.7
 IM_WIDTH = IM_HEIGHT = 198
@@ -117,17 +128,7 @@ class UtkFaceDataGenerator():
 data_generator = UtkFaceDataGenerator(df)
 train_idx, valid_idx, test_idx = data_generator.generate_split_indexes() 
 
-from keras.models import Model
-from keras.layers.normalization import BatchNormalization
-from keras.layers.convolutional import Conv2D
-from keras.layers.convolutional import MaxPooling2D
-from keras.layers.core import Activation
-from keras.layers.core import Dropout
-from keras.layers.core import Lambda
-from keras.layers.core import Dense
-from keras.layers import Flatten
-from keras.layers import Input
-import tensorflow as tf
+
 class UtkMultiOutputModel():
 
     def make_default_hidden_layers(self, inputs):
@@ -136,13 +137,27 @@ class UtkMultiOutputModel():
         x = Activation("relu")(x)
         x = BatchNormalization(axis=-1)(x)
         x = MaxPooling2D(pool_size=(3, 3))(x)
-        x = Dropout(0.25)(x)
+        x = Dropout(0.35)(x)
+        
+        x = Conv2D(32, (3, 3), padding="same")(x)
+        x = Activation("relu")(x)
+        x = BatchNormalization(axis=-1)(x)
+        #x = MaxPooling2D(pool_size=(2, 2))(x)
+        x = Dropout(0.35)(x)
+        
         x = Conv2D(32, (3, 3), padding="same")(x)
         x = Activation("relu")(x)
         x = BatchNormalization(axis=-1)(x)
         x = MaxPooling2D(pool_size=(2, 2))(x)
-        x = Dropout(0.25)(x)
-        x = Conv2D(32, (3, 3), padding="same")(x)
+        x = Dropout(0.35)(x)
+        
+        x = Conv2D(64, (3, 3), padding="same")(x)
+        x = Activation("relu")(x)
+        x = BatchNormalization(axis=-1)(x)
+        #x = MaxPooling2D(pool_size=(2, 2))(x)
+        x = Dropout(0.35)(x)
+        
+        x = Conv2D(64, (3, 3), padding="same")(x)
         x = Activation("relu")(x)
         x = BatchNormalization(axis=-1)(x)
         x = MaxPooling2D(pool_size=(2, 2))(x)
@@ -206,9 +221,8 @@ plot_model(model, to_file='model_plot.png')
 Image("model_plot.png")
 
 from keras.optimizers import Adam
-init_lr = 1e-4
 epochs = 100
-opt = Adam(lr=init_lr, decay=init_lr / epochs)
+opt = Adam()
 model.compile(optimizer=opt, 
               loss={
                   'age_output': 'mse', 
