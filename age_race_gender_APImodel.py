@@ -1,6 +1,6 @@
 '''
 Using function API to generate a single input, triple output model for age, gender and race detection model,
-need emotion.h5 model for transfer learning which can be produced by run emotion.py
+need emotion.h5 model for transfer learning which can be produced by run emotion_model.py in this repository.
 age_val_mae:0.06
 race_val_acc:0.82
 gender_val_acc:0.92
