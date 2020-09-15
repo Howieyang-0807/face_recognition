@@ -1,6 +1,7 @@
 '''
 Using function API to generate a single input, triple output model for age, gender and race detection model,
 need emotion.h5 model for transfer learning which can be produced by run emotion_model.py in this repository.
+dataset:UTKface(23708 pcs) 70% for training and 30% for validation
 age_val_mae:0.06
 race_val_acc:0.82
 gender_val_acc:0.92
@@ -8,13 +9,15 @@ gender_val_acc:0.92
 import numpy as np 
 import pandas as pd
 import os
+import io
 import glob
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from keras.models import Model
+from tensorflow.keras.models import Model
 from keras.layers.normalization import BatchNormalization
-from keras.layers.convolutional import Conv2D
+from keras.layers import Conv2D
+from keras.layers import SeparableConv2D
 from keras.layers.convolutional import MaxPooling2D
 from keras.layers.core import Activation
 from keras.layers.core import Dropout
@@ -22,7 +25,10 @@ from keras.layers.core import Lambda
 from keras.layers.core import Dense
 from keras.layers import Flatten
 from keras.layers import Input
-import tensorflow as tf
+from keras.optimizers import Adam
+from keras.models import load_model
+from keras.models import model_from_json
+import json
 dataset_folder_name = 'UTKFace'
 TRAIN_TEST_SPLIT = 0.7
 IM_WIDTH = IM_HEIGHT = 198
