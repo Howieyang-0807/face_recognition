@@ -1,3 +1,10 @@
+'''
+Using function API to generate a single input, triple output model for age, gender and race detection model,
+need emotion.h5 model for transfer learning which can be produced by run emotion.py
+age_val_mae:0.06
+race_val_acc:0.82
+gender_val_acc:0.92
+'''
 import numpy as np 
 import pandas as pd
 import os
@@ -36,14 +43,7 @@ dataset_dict['gender_alias'] = dict((g, i) for i, g in dataset_dict['gender_id']
 dataset_dict['race_alias'] = dict((r, i) for i, r in dataset_dict['race_id'].items())
 
 def parse_dataset(dataset_path, ext='jpg'):
-    """
-    Used to extract information about our dataset. It does iterate over all images and return a DataFrame with
-    the data (age, gender and sex) of all files.
-    """
     def parse_info_from_file(path):
-        """
-        Parse information from a single file
-        """
         try:
             filename = os.path.split(path)[1]
             filename = os.path.splitext(filename)[0]
@@ -93,6 +93,7 @@ class UtkFaceDataGenerator():
     def preprocess_image(self, img_path):
 
         im = PIL.Image.open(img_path)
+        im = im.convert('L')
         im = im.resize((IM_WIDTH, IM_HEIGHT))
         im = np.array(im) / 255.0
         
@@ -128,40 +129,17 @@ class UtkFaceDataGenerator():
 data_generator = UtkFaceDataGenerator(df)
 train_idx, valid_idx, test_idx = data_generator.generate_split_indexes() 
 
+conv_base = model_from_json(open(('emotion.json'), 'r').read())
+conv_base.load_weights('emotion.h5')
 
 class UtkMultiOutputModel():
 
     def make_default_hidden_layers(self, inputs):
-
-        x = Conv2D(16, (3, 3), padding="same")(inputs)
-        x = Activation("relu")(x)
-        x = BatchNormalization(axis=-1)(x)
-        x = MaxPooling2D(pool_size=(3, 3))(x)
-        x = Dropout(0.35)(x)
         
-        x = Conv2D(32, (3, 3), padding="same")(x)
-        x = Activation("relu")(x)
-        x = BatchNormalization(axis=-1)(x)
-        #x = MaxPooling2D(pool_size=(2, 2))(x)
-        x = Dropout(0.35)(x)
-        
-        x = Conv2D(32, (3, 3), padding="same")(x)
-        x = Activation("relu")(x)
-        x = BatchNormalization(axis=-1)(x)
-        x = MaxPooling2D(pool_size=(2, 2))(x)
-        x = Dropout(0.35)(x)
-        
-        x = Conv2D(64, (3, 3), padding="same")(x)
-        x = Activation("relu")(x)
-        x = BatchNormalization(axis=-1)(x)
-        #x = MaxPooling2D(pool_size=(2, 2))(x)
-        x = Dropout(0.35)(x)
-        
-        x = Conv2D(64, (3, 3), padding="same")(x)
-        x = Activation("relu")(x)
-        x = BatchNormalization(axis=-1)(x)
-        x = MaxPooling2D(pool_size=(2, 2))(x)
-        x = Dropout(0.25)(x)
+        x=(inputs)
+        for layer in conv_base.layers[0:9]:
+            layer.trainable=False 
+            x=layer(x)
         return x
     
     def build_race_branch(self, inputs, num_races):
