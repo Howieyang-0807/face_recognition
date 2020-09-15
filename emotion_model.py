@@ -1,3 +1,7 @@
+'''
+Generate emotion.json, emotion.h5 files for emotion detection model, will use emotion.h5 to run transfer learning for age, gender and race detection model producing,
+val_acc for 69%
+'''
 import sys, os
 import pandas as pd
 import numpy as np
