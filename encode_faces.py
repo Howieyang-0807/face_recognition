@@ -1,7 +1,4 @@
-# USAGE
 # python3 encode_faces.py --dataset face_recog_dataset --encodings encodings.pickle
-
-# import the necessary packages
 from imutils import paths
 import face_recognition
 import argparse
@@ -23,13 +20,11 @@ args = vars(ap.parse_args())
 print("[INFO] quantifying faces...")
 imagePaths = list(paths.list_images(args["dataset"]))
 
-# initialize the list of known encodings and known names
 knownEncodings = []
 knownNames = []
 
 # loop over the image paths
 for (i, imagePath) in enumerate(imagePaths):
-    # extract the person name from the image path
     print("[INFO] processing image {}/{}".format(i + 1,
         len(imagePaths)))
     name = imagePath.split(os.path.sep)[-2]
